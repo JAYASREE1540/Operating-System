@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>  // Include to use wait() function
+
+struct msg_buffer {
+    long msg_type;
+    char msg_text[100];
+};
+
+int main() {
+    key_t key = ftok("progfile", 65);   // Generate unique key
+    int msgid = msgget(key, 0666 | IPC_CREAT);  // Create message queue
+    struct msg_buffer message;
+
+    if (fork() == 0) { // Child process (Consumer)
+        msgrcv(msgid, &message, sizeof(message), 1, 0);  // Receive message
+        printf("Consumer received: %s\n", message.msg_text);
+        msgctl(msgid, IPC_RMID, NULL);  // Remove message queue after use
+    } else { // Parent process (Producer)
+        message.msg_type = 1;  // Set message type
+        strcpy(message.msg_text, "Hello from producer!");  // Set message text
+        msgsnd(msgid, &message, sizeof(message), 0);  // Send message to queue
+        printf("Producer sent: %s\n", message.msg_text);
+        wait(NULL);  // Wait for child process to finish
+    }
+
+    return 0;
+}
