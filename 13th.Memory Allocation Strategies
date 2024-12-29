@@ -1,54 +1,24 @@
 #include <stdio.h>
+#define MEM_SIZE 10
 
-#define MEMORY_SIZE 10
-int memory[MEMORY_SIZE] = {0}; // 0 means free
+int mem[MEM_SIZE] = {0};
 
-void firstFit(int size) {
-    for (int i = 0; i < MEMORY_SIZE; i++) {
-        if (memory[i] == 0 && i + size <= MEMORY_SIZE) {
-            printf("Allocated %d units using First Fit at block %d.\n", size, i);
-            for (int j = i; j < i + size; j++) memory[j] = 1;
+void allocate(const char* fit, int size) {
+    for (int i = 0; i <= MEM_SIZE - size; i++) {
+        int free = 1;
+        for (int j = 0; j < size; j++) if (mem[i + j]) free = 0;
+        if (free) {
+            printf("%s Fit: Allocated %d units at %d\n", fit, size, i);
+            for (int j = 0; j < size; j++) mem[i + j] = 1;
             return;
         }
     }
-    printf("Not enough memory for First Fit.\n");
-}
-
-void bestFit(int size) {
-    int bestIdx = -1;
-    for (int i = 0; i < MEMORY_SIZE; i++) {
-        if (memory[i] == 0 && i + size <= MEMORY_SIZE) {
-            bestIdx = i;
-            break;
-        }
-    }
-    if (bestIdx != -1) {
-        printf("Allocated %d units using Best Fit at block %d.\n", size, bestIdx);
-        for (int j = bestIdx; j < bestIdx + size; j++) memory[j] = 1;
-    } else {
-        printf("Not enough memory for Best Fit.\n");
-    }
-}
-
-void worstFit(int size) {
-    int worstIdx = -1;
-    for (int i = 0; i < MEMORY_SIZE; i++) {
-        if (memory[i] == 0 && i + size <= MEMORY_SIZE) {
-            worstIdx = i;
-            break;
-        }
-    }
-    if (worstIdx != -1) {
-        printf("Allocated %d units using Worst Fit at block %d.\n", size, worstIdx);
-        for (int j = worstIdx; j < worstIdx + size; j++) memory[j] = 1;
-    } else {
-        printf("Not enough memory for Worst Fit.\n");
-    }
+    printf("%s Fit: Not enough memory\n", fit);
 }
 
 int main() {
-    firstFit(3);
-    bestFit(2);
-    worstFit(4);
+    allocate("First", 3);
+    allocate("Best", 2);
+    allocate("Worst", 4);
     return 0;
 }
